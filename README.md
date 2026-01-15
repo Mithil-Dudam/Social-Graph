@@ -74,4 +74,3 @@ uvicorn main:app --reload
 
 ## License
 MIT
-# RAG-Document-Structure-

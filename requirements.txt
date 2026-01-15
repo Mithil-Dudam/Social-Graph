@@ -1,0 +1,8 @@
+langchain-community
+pymupdf
+langchain-ollama
+chromadb
+
+fastapi
+uvicorn
+python-multipart
