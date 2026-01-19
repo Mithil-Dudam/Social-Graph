@@ -36,4 +36,3 @@ Type messages and press Enter to send requests to the server. The server will re
 
 ## License
 MIT License
-# Python-Socket-Rate-Limiter
