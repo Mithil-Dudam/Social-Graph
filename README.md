@@ -1,76 +1,39 @@
-# RAG API with LangChain, FastAPI, ChromaDB, and Ollama
+# Python Socket Rate Limiter
 
-This project is a Retrieval-Augmented Generation (RAG) API built with FastAPI. It allows users to upload documents (PDFs, CSVs), automatically chunk and embed them, and then query the data using a Large Language Model (LLM) via Ollama. The system uses ChromaDB for vector storage and retrieval.
+This project demonstrates a simple rate-limited server and client using Python sockets and threading. It implements a per-user rate limiter using the token bucket algorithm.
 
 ## Features
-- Upload PDF and CSV files per user
-- Automatic chunking (PDFs) and embedding of documents
-- Store and retrieve document embeddings using ChromaDB
-- Query your data with semantic search and LLM-powered answers
-- Async LLM response generation with job polling
-- Background processing for file ingestion
-- WSL/Linux compatible, Docker-ready
-
-## API Endpoints
-
-### `GET /id`
-Get a new unique user ID.
-- **Response:** `{ "id": <uuid> }`
-
-### `POST /upload`
-Upload one or more files for a user.
-- **Params:**
-  - `id`: User ID (string, required)
-  - `files`: List of files (PDF or CSV)
-- **Response:** `{ "file_upload": true }`
-
-### `POST /answer-query`
-Ask a question about your uploaded documents.
-- **Params:**
-  - `id`: User ID (string, required)
-  - `query`: Your question (string, required)
-- **Response:** `{ "job_id": <job_id> }`
-
-### `GET /get-response/{job_id}`
-Poll for the LLM's answer to your query.
-- **Response:** `{ "response": <answer or status> }`
+- **Server**: Accepts multiple client connections, assigns each a unique ID, and enforces a rate limit (10 requests per minute per user).
+- **Client**: Connects to the server and allows sending requests interactively, displaying server responses.
+- **Rate Limiting**: Uses a token bucket algorithm for efficient and fair request limiting.
 
 ## How It Works
-1. **Upload:** User uploads files. Files are saved and processed in the background.
-2. **Ingestion:** PDFs are chunked, CSVs are loaded row-wise, all are embedded and stored in ChromaDB.
-3. **Query:** User submits a question. The API retrieves the most relevant chunks/rows and sends them as context to the LLM.
-4. **Async Answer:** LLM response is generated in a background thread. User polls for the answer using the job ID.
+- Each client connection is assigned a unique user ID.
+- Each user starts with 10 tokens (requests allowed).
+- Tokens are refilled at a rate of 10 per 60 seconds (1 every 6 seconds).
+- If a user sends a request and has tokens, the request is allowed and a token is consumed.
+- If no tokens are available, the server responds with a rate limit message.
 
-## Setup & Requirements
-- Python 3.10+
-- FastAPI
-- ChromaDB
-- LangChain
-- Ollama (for LLM and embeddings)
-- PyMuPDF (for PDF loading)
-- Docker (optional, for containerization)
+## Usage
 
-Install dependencies:
+### 1. Start the Server
 ```bash
-pip install -r requirements.txt
+python server.py
 ```
 
-Start the API:
+### 2. Start the Client (in a new terminal)
 ```bash
-uvicorn main:app --reload
+python client.py
 ```
+Type messages and press Enter to send requests to the server. The server will respond if you are rate-limited or allowed.
+
+## Requirements
+- Python 3.x
+- No external dependencies (uses only the Python standard library)
 
 ## Notes
-- All user files are stored in `user_files/{user_id}` and cleaned up on server shutdown.
-- Only PDFs are chunked; CSVs are embedded row-wise.
-
-## Example Query
-```json
-{
-  "id": "<user_id>",
-  "query": "What is the manufacturer of Cheerios?"
-}
-```
+- This project is for educational/demo purposes. 
 
 ## License
-MIT
+MIT License
+# Python-Socket-Rate-Limiter
