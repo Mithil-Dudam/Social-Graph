@@ -29,4 +29,3 @@ This project provides a thread-safe Least Recently Used (LRU) cache implementati
 
 ## License
 This project is provided for educational purposes and has no specific license.
-# LRU-Cache-Implementation-in-Python
