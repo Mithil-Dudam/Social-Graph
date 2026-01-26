@@ -1,31 +1,45 @@
-# LRU Cache Implementation in Python
+# Threaded Job Scheduler with MinHeap
 
-This project provides a thread-safe Least Recently Used (LRU) cache implementation using a doubly linked list and a hash map (dictionary) in Python.
+This project implements a simple threaded job scheduler in Python using a custom MinHeap for job scheduling. Jobs can be scheduled to run after a specified delay, and the system supports clean shutdown via Ctrl+C.
 
 ## Features
-- O(1) time complexity for set, get, and delete operations
-- Automatic eviction of the least recently used item when the cache is full
-- Thread-safe using `threading.RLock`
-- Includes a test suite at the bottom of `main.py` to demonstrate cache behavior
-- Internal state printing for debugging and understanding cache order
+- **MinHeap-based Scheduling:** Jobs are stored in a min-heap, ordered by their scheduled execution time.
+- **Producer-Consumer Model:**
+  - The producer thread accepts user input to schedule jobs.
+  - The consumer thread executes jobs at their scheduled time.
+- **Thread-Safe:** Uses locks and condition variables to ensure safe concurrent access.
+- **Graceful Shutdown:** Cleanly exits on Ctrl+C, ensuring all threads terminate properly.
 
 ## How It Works
-- The cache uses a doubly linked list to maintain the order of usage (most recently used at the head, least at the tail).
-- A dictionary maps keys to their corresponding nodes for O(1) access.
-- When the cache reaches its capacity, the least recently used item is evicted.
-- All operations are thread-safe.
+- **Job Scheduling:**
+  - Enter a number to schedule a job after that many seconds.
+  - Enter a letter to schedule a job immediately.
+- **Job Execution:**
+  - The consumer thread waits for the next job's scheduled time and executes it.
+  - Each job prints a random number after a random delay.
 
 ## Usage
-1. Clone or download this repository.
-2. Run the main file:
+1. Run the script:
    ```bash
    python main.py
    ```
-3. Observe the printed output and cache state transitions after each operation.
+2. Enter a number (e.g., `5`) to schedule a job after 5 seconds.
+3. Enter a letter (e.g., `a`) to schedule a job immediately.
+4. Press `Ctrl+C` to shut down the scheduler cleanly.
 
-## Customization
-- You can change the cache capacity by modifying the argument to `Cache()` in `main.py`.
-- Add or modify test cases at the bottom of `main.py` to further explore cache behavior.
+## Code Structure
+- **MinHeap class:** Thread-safe min-heap for scheduling jobs.
+- **producers:** Thread function to accept user input and schedule jobs.
+- **consumers:** Thread function to execute jobs at their scheduled time.
+- **Graceful shutdown:** Uses `threading.Event` and condition variables for clean exit.
 
-## License
-This project is provided for educational purposes and has no specific license.
+## Requirements
+- Python 3.7+
+
+## Notes
+- The producer thread may remain blocked on input during shutdown; this is a known limitation of Python's `input()` function.
+- All jobs are simple functions that print a random number after a random delay.
+
+---
+Feel free to modify the job function or extend the scheduler for more complex use cases!
+# Job-Scheduler-
