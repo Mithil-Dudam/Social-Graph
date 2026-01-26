@@ -1,44 +1,42 @@
-# Threaded Job Scheduler with MinHeap
+# Python ThreadPool Implementation
 
-This project implements a simple threaded job scheduler in Python using a custom MinHeap for job scheduling. Jobs can be scheduled to run after a specified delay, and the system supports clean shutdown via Ctrl+C.
+This project demonstrates a custom thread pool in Python, built from scratch using threading, a linked-list-based queue, and condition variables. It allows you to submit jobs (functions) for concurrent execution by a fixed number of worker threads.
 
 ## Features
-- **MinHeap-based Scheduling:** Jobs are stored in a min-heap, ordered by their scheduled execution time.
-- **Producer-Consumer Model:**
-  - The producer thread accepts user input to schedule jobs.
-  - The consumer thread executes jobs at their scheduled time.
-- **Thread-Safe:** Uses locks and condition variables to ensure safe concurrent access.
-- **Graceful Shutdown:** Cleanly exits on Ctrl+C, ensuring all threads terminate properly.
+- **Custom Thread-Safe Queue:** Implements a linked list queue with thread-safe enqueue and dequeue operations using locks and condition variables.
+- **ThreadPool Class:** Manages worker threads, job submission, and graceful shutdown.
+- **Graceful Shutdown:** Ensures all jobs finish and all threads exit cleanly on shutdown (Ctrl+C).
+- **Job Submission:** Submit jobs interactively via user input; jobs are distributed among worker threads and run in parallel.
 
 ## How It Works
-- **Job Scheduling:**
-  - Enter a number to schedule a job after that many seconds.
-  - Enter a letter to schedule a job immediately.
-- **Job Execution:**
-  - The consumer thread waits for the next job's scheduled time and executes it.
-  - Each job prints a random number after a random delay.
+- Start the program. Each time you enter input and press Enter, a new job is submitted to the pool.
+- Each job simulates work by sleeping for a random number of seconds and then prints a completion message.
+- Up to 3 jobs run in parallel (configurable by changing the number of workers).
+- Press Ctrl+C to shut down the pool and exit cleanly.
 
 ## Usage
 1. Run the script:
    ```bash
    python main.py
    ```
-2. Enter a number (e.g., `5`) to schedule a job after 5 seconds.
-3. Enter a letter (e.g., `a`) to schedule a job immediately.
-4. Press `Ctrl+C` to shut down the scheduler cleanly.
+2. Enter any input and press Enter to submit a job.
+3. Repeat to submit more jobs.
+4. Press Ctrl+C to shut down the thread pool and exit.
 
 ## Code Structure
-- **MinHeap class:** Thread-safe min-heap for scheduling jobs.
-- **producers:** Thread function to accept user input and schedule jobs.
-- **consumers:** Thread function to execute jobs at their scheduled time.
-- **Graceful shutdown:** Uses `threading.Event` and condition variables for clean exit.
+- **Node:** Linked list node for the queue.
+- **Queue:** Thread-safe queue for jobs, using a linked list and condition variable.
+- **ThreadPool:** Manages worker threads, job submission, and shutdown.
+- **job():** Example job function that simulates work.
 
 ## Requirements
 - Python 3.7+
 
 ## Notes
-- The producer thread may remain blocked on input during shutdown; this is a known limitation of Python's `input()` function.
-- All jobs are simple functions that print a random number after a random delay.
+- This implementation does not use Python's built-in `queue.Queue` or `concurrent.futures.ThreadPoolExecutor`—it is built from first principles for educational purposes.
+- You can modify the `job()` function to run any callable.
+- The number of worker threads can be changed by editing `ThreadPool(3)`.
 
 ---
-Feel free to modify the job function or extend the scheduler for more complex use cases!
+Feel free to extend this project with more advanced features, such as job results, exception handling, or timeout support!
+# Python-ThreadPool-Implementation
