@@ -39,4 +39,3 @@ This project demonstrates a custom thread pool in Python, built from scratch usi
 
 ---
 Feel free to extend this project with more advanced features, such as job results, exception handling, or timeout support!
-# Python-ThreadPool-Implementation
