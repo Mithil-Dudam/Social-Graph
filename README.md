@@ -42,4 +42,3 @@ This project implements a simple threaded job scheduler in Python using a custom
 
 ---
 Feel free to modify the job function or extend the scheduler for more complex use cases!
-# Job-Scheduler-

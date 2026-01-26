@@ -1,139 +1,127 @@
 import threading
+import time
+import random
 
 
-class Node:
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-        self.next = None
-        self.prev = None
-
-
-class Cache:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.cache = {}
+class MinHeap:
+    def __init__(self):
+        self.heap = []
         self.lock = threading.RLock()
-        self.head = Node(None, None)
-        self.tail = Node(None, None)
-        self.head.next = self.tail
-        self.tail.prev = self.head
+        self.condition = threading.Condition(self.lock)
 
-    def set(self, key, value):
-        with self.lock:
-            if len(self.cache) < self.capacity or key in self.cache:
-                if key not in self.cache:
-                    node = Node(key, value)
-                    self.cache[key] = node
-                    if self.head.next == self.tail:
-                        self.head.next = node
-                        self.tail.prev = node
-                        node.next = self.tail
-                        node.prev = self.head
-                        t = self.traverse()
-                        print(t)
-                        return f"Set Key '{key}' with value '{value}'"
-                    else:
-                        self._move_node_to_head(node, disconnect=False)
-                        t = self.traverse()
-                        print(t)
-                        return f"Set Key '{key}' with value '{value}'"
+    def insert(self, job, schedule_time=0):
+        job_obj = (job, time.time() + schedule_time)
+        with self.condition:
+            if not self.heap:
+                self.heap.append(job_obj)
+                self.condition.notify()
+                return
+            self.heap.append(job_obj)
+            index = len(self.heap) - 1
+            while index > 0:
+                parent = (index - 1) // 2
+                if self.heap[index][1] < self.heap[parent][1]:
+                    self.heap[index], self.heap[parent] = (
+                        self.heap[parent],
+                        self.heap[index],
+                    )
+                    index = parent
                 else:
-                    node = self.cache[key]
-                    node.value = value
-                    if node.prev == self.head:
-                        t = self.traverse()
-                        print(t)
-                        return f"Set Key '{key}' with value '{value}'"
-                    self._move_node_to_head(node)
-                    t = self.traverse()
-                    print(t)
-                    return f"Set Key '{key}' with value '{value}'"
-            else:
-                old_key = self.tail.prev.key
-                temp = self.tail.prev
-                temp.prev.next = self.tail
-                self.tail.prev = temp.prev
-                del self.cache[old_key]
-                node = Node(key, value)
-                self.cache[key] = node
-                self._move_node_to_head(node, disconnect=False)
-                t = self.traverse()
-                print(t)
-                return f"Set Key '{key}' with value '{value}'"
+                    break
+            self.condition.notify()
 
-    def get(self, key):
-        with self.lock:
-            if key not in self.cache:
-                return "Key does not exist"
-            node = self.cache[key]
-            data = node.value
-            if node.prev == self.head:
-                return data
-            self._move_node_to_head(node)
-            t = self.traverse()
-            print(t)
-            return data
+    def extract(self):
+        with self.condition:
+            if len(self.heap) == 1:
+                job_obj = self.heap.pop()
+                return job_obj
+            self.heap[0], self.heap[-1] = self.heap[-1], self.heap[0]
+            job_obj = self.heap.pop()
+            index = 0
+            while index < len(self.heap):
+                left = 2 * index + 1
+                right = 2 * index + 2
+                smallest_index = index
 
-    def delete(self, key):
-        with self.lock:
-            if key not in self.cache:
-                t = self.traverse()
-                print(t)
-                return "Key does not exist"
-            node = self.cache[key]
-            node.next.prev = node.prev
-            node.prev.next = node.next
-            del self.cache[key]
-            t = self.traverse()
-            print(t)
-            return "Key deleted"
+                if (
+                    left < len(self.heap)
+                    and self.heap[left][1] < self.heap[smallest_index][1]
+                ):
+                    smallest_index = left
+                if (
+                    right < len(self.heap)
+                    and self.heap[right][1] < self.heap[smallest_index][1]
+                ):
+                    smallest_index = right
+                if smallest_index == index:
+                    break
+                else:
+                    self.heap[index], self.heap[smallest_index] = (
+                        self.heap[smallest_index],
+                        self.heap[index],
+                    )
+                    index = smallest_index
+        return job_obj
 
-    def _move_node_to_head(self, node, disconnect=True):
-        if disconnect:
-            node.next.prev = node.prev
-            node.prev.next = node.next
-        node.next = self.head.next
-        node.prev = self.head
-        node.next.prev = node
-        self.head.next = node
-
-    def traverse(self):
-        with self.lock:
-            current = self.head.next
-            temp = []
-            while current != self.tail:
-                temp.append(current.key)
-                current = current.next
-            return " <-> ".join(temp)
+    def peek(self):
+        with self.condition:
+            if not self.heap:
+                return None
+            return self.heap[0]
 
 
-cache = Cache(3)
-print(cache.set("a", 1))
-print(cache.set("b", 2))
-print(cache.set("c", 3))
-print(cache.get("a"))
-print(cache.set("d", 4))
-print(cache.get("b"))
-print(cache.get("c"))
-print(cache.get("d"))
-print(cache.set("c", 33))
-print(cache.get("c"))
-print(cache.delete("a"))
-print(cache.get("a"))
-print(cache.delete("x"))
-print(cache.set("e", 5))
-print(cache.get("d"))
-print(cache.get("e"))
-print(cache.get("c"))
+h = MinHeap()
 
-print(cache.set("e", 55))
-print(cache.get("e"))
-print(cache.set("f", 6))
-print(cache.get("c"))
-print(cache.get("f"))
-print(cache.delete("f"))
-print(cache.get("f"))
-print(cache.set("g", 7))
-print(cache.get("e"))
-print(cache.get("g"))
+
+def job():
+    print("\nRunning job...")
+    sleep_time = random.randint(4, 10)
+    print(f"Thinking of a number for {sleep_time} seconds.")
+    time.sleep(sleep_time)
+    print(f"The number is {random.randint(0, 9)}")
+
+
+def producers(h):
+    while not shutdown_event.is_set():
+        user_inp = input()
+        if shutdown_event.is_set():
+            break
+        if user_inp.isdigit():
+            h.insert(job, float(user_inp))
+        elif user_inp.isalpha():
+            h.insert(job)
+
+
+def consumers(h):
+    while not shutdown_event.is_set():
+        with h.condition:
+            while not h.heap and not shutdown_event.is_set():
+                h.condition.wait()
+            if shutdown_event.is_set():
+                break
+            job_obj = h.peek()
+            time_now = time.time()
+            if job_obj[1] > time_now:
+                h.condition.wait(timeout=job_obj[1] - time_now)
+                continue
+            do_job = h.extract()
+            if callable(do_job[0]):
+                do_job[0]()
+
+
+shutdown_event = threading.Event()
+
+t1 = threading.Thread(target=producers, args=(h,), daemon=True)
+t2 = threading.Thread(target=consumers, args=(h,), daemon=True)
+t1.start()
+t2.start()
+
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    shutdown_event.set()
+    with h.condition:
+        h.condition.notify_all()
+    t2.join()
+    print("\nShutting down. If blocked, press Enter to exit.")
