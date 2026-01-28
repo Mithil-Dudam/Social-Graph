@@ -100,4 +100,3 @@ MIT License
 ## Author
 
 Mithil
-# Trie-based-Autocomplete-Engine-with-Per-Node-Top-K-Min-Heaps
