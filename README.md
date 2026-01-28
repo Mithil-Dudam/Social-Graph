@@ -1,41 +1,103 @@
-# Python ThreadPool Implementation
+# Trie-based Autocomplete Engine with Per-Node Top-K Min-Heaps
 
-This project demonstrates a custom thread pool in Python, built from scratch using threading, a linked-list-based queue, and condition variables. It allows you to submit jobs (functions) for concurrent execution by a fixed number of worker threads.
+## Overview
 
-## Features
-- **Custom Thread-Safe Queue:** Implements a linked list queue with thread-safe enqueue and dequeue operations using locks and condition variables.
-- **ThreadPool Class:** Manages worker threads, job submission, and graceful shutdown.
-- **Graceful Shutdown:** Ensures all jobs finish and all threads exit cleanly on shutdown (Ctrl+C).
-- **Job Submission:** Submit jobs interactively via user input; jobs are distributed among worker threads and run in parallel.
-
-## How It Works
-- Start the program. Each time you enter input and press Enter, a new job is submitted to the pool.
-- Each job simulates work by sleeping for a random number of seconds and then prints a completion message.
-- Up to 3 jobs run in parallel (configurable by changing the number of workers).
-- Press Ctrl+C to shut down the pool and exit cleanly.
-
-## Usage
-1. Run the script:
-   ```bash
-   python main.py
-   ```
-2. Enter any input and press Enter to submit a job.
-3. Repeat to submit more jobs.
-4. Press Ctrl+C to shut down the thread pool and exit.
-
-## Code Structure
-- **Node:** Linked list node for the queue.
-- **Queue:** Thread-safe queue for jobs, using a linked list and condition variable.
-- **ThreadPool:** Manages worker threads, job submission, and shutdown.
-- **job():** Example job function that simulates work.
-
-## Requirements
-- Python 3.7+
-
-## Notes
-- This implementation does not use Python's built-in `queue.Queue` or `concurrent.futures.ThreadPoolExecutor`—it is built from first principles for educational purposes.
-- You can modify the `job()` function to run any callable.
-- The number of worker threads can be changed by editing `ThreadPool(3)`.
+This project implements a scalable, thread-safe autocomplete engine using a Trie data structure. Each Trie node maintains a min-heap to efficiently track the top-k most frequent words for every prefix. The engine supports fast insert, select (frequency update), delete, and search (autocomplete) operations.
 
 ---
-Feel free to extend this project with more advanced features, such as job results, exception handling, or timeout support!
+
+## Features
+
+- **Efficient Insert:** Add new words to the Trie and update per-node top-k heaps.
+- **Autocomplete Search:** Instantly retrieve the most frequent completions for any prefix.
+- **Frequency Ranking:** Selecting a word increases its frequency, affecting its ranking in suggestions.
+- **Delete:** Remove words from the Trie and update all relevant heaps.
+- **Thread Safety:** All operations are protected by locks for concurrent use.
+- **Configurable Top-K:** Each node maintains a heap of up to 10 most frequent words (can be adjusted).
+
+---
+
+## How It Works
+
+- **Trie Structure:** Each node represents a prefix and has children for each possible next character.
+- **Min-Heap at Each Node:** Stores up to k words with the highest frequencies for that prefix.
+- **Index Mapping:** Allows fast updates and lookups in the heap.
+- **Insert/Select:** Update the heap at every node along the word's path.
+- **Delete:** Remove the word from all relevant heaps and the Trie.
+
+---
+
+## Usage
+
+### Example
+
+```python
+engine = AutoCompleteEngine()
+
+# Insert words
+engine.insert("cat")
+engine.insert("car")
+engine.insert("cart")
+engine.insert("catalog")
+
+# Select (increase frequency)
+engine.select("car")
+engine.select("car")
+engine.select("cart")
+
+# Autocomplete search
+print(engine.search("ca"))      # ['catalog', 'cart', 'car', 'cat']
+
+# Delete a word
+engine.delete("cat")
+
+# Search with k parameter
+print(engine.search("ca", k=2)) # ['catalog', 'cart']
+```
+
+---
+
+## Test Cases
+
+The project includes comprehensive test cases that cover:
+
+- Insertion (including duplicates)
+- Frequency updates and ranking
+- Deletion (existing and non-existing words)
+- Heap size limit (top-k)
+- Edge cases (re-insertion after deletion, selecting/deleting non-existent words)
+- Search/autocomplete for various prefixes
+- Search with `k` parameter
+- Manual inspection of per-node top-k heaps
+
+---
+
+## Time Complexity
+
+- **Insert:** $O(n \log k)$
+- **Select:** $O(n \log k)$
+- **Delete:** $O(n \log k)$
+- **Search:** $O(n + k \log k)$
+
+Where $n$ is the length of the word/prefix and $k$ is the heap size (default 10).
+
+---
+
+## Notes
+
+- For most real-world autocomplete use cases, $k$ is small (e.g., 10).
+- The engine is thread-safe and suitable for concurrent environments.
+- For very large $k$, consider memory and performance trade-offs.
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Author
+
+Mithil
+# Trie-based-Autocomplete-Engine-with-Per-Node-Top-K-Min-Heaps
