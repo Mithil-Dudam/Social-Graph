@@ -15,7 +15,6 @@ A thread-safe, in-memory social network graph implemented in Python. This projec
 
 ### Prerequisites
 - Python 3.7+
-```
 
 ### Usage
 1. Clone or download this repository.
