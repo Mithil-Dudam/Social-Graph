@@ -32,4 +32,3 @@ MIT License
 
 ## Author
 Mithil Dudam
-# Social-Graph
